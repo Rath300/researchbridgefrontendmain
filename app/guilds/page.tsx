@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight, Award, Users } from "lucide-react"
@@ -5,6 +8,8 @@ import { ArrowRight, Award, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/hooks/use-toast"
 
 // Mock data for research guilds
 const guilds = [
@@ -18,6 +23,12 @@ const guilds = [
     ranking: 1,
     categories: ["Physics", "Computer Science"],
     featuredProject: "Quantum Algorithm for Climate Modeling",
+    topics: ["Quantum Computing", "Quantum Algorithms", "Physics"],
+    leader: {
+      name: "Dr. Sarah Chen",
+      avatar_url: "/placeholder-user.jpg",
+    },
+    isJoined: false,
   },
   {
     id: "2",
@@ -29,6 +40,12 @@ const guilds = [
     ranking: 2,
     categories: ["Biology", "Medicine", "Genetics"],
     featuredProject: "CRISPR Applications in Rare Disease Treatment",
+    topics: ["Biotechnology", "Genetics", "Medicine"],
+    leader: {
+      name: "Prof. Michael Brown",
+      avatar_url: "/placeholder-user.jpg",
+    },
+    isJoined: true,
   },
   {
     id: "3",
@@ -40,6 +57,12 @@ const guilds = [
     ranking: 3,
     categories: ["Environmental Science", "Engineering"],
     featuredProject: "Microplastic Filtration System for Urban Waterways",
+    topics: ["Environmental Science", "Engineering"],
+    leader: {
+      name: "Dr. Emily Zhang",
+      avatar_url: "/placeholder-user.jpg",
+    },
+    isJoined: false,
   },
   {
     id: "4",
@@ -51,6 +74,12 @@ const guilds = [
     ranking: 4,
     categories: ["AI", "Neuroscience", "Computer Science"],
     featuredProject: "Neural Network for Early Alzheimer's Detection",
+    topics: ["AI", "Neuroscience", "Computer Science"],
+    leader: {
+      name: "Dr. Sarah Chen",
+      avatar_url: "/placeholder-user.jpg",
+    },
+    isJoined: false,
   },
   {
     id: "5",
@@ -62,10 +91,43 @@ const guilds = [
     ranking: 5,
     categories: ["Psychology", "Sociology"],
     featuredProject: "Impact of Digital Communication on Adolescent Development",
+    topics: ["Psychology", "Sociology"],
+    leader: {
+      name: "Prof. Michael Brown",
+      avatar_url: "/placeholder-user.jpg",
+    },
+    isJoined: false,
   },
 ]
 
 export default function GuildsPage() {
+  const { toast } = useToast()
+  const [guildsList, setGuildsList] = useState(guilds)
+
+  const handleJoinGuild = (guildId: string) => {
+    setGuildsList((prevGuilds) =>
+      prevGuilds.map((guild) =>
+        guild.id === guildId ? { ...guild, isJoined: true } : guild
+      )
+    )
+    toast({
+      title: "Joined Guild!",
+      description: "You have successfully joined the guild.",
+    })
+  }
+
+  const handleLeaveGuild = (guildId: string) => {
+    setGuildsList((prevGuilds) =>
+      prevGuilds.map((guild) =>
+        guild.id === guildId ? { ...guild, isJoined: false } : guild
+      )
+    )
+    toast({
+      title: "Left Guild",
+      description: "You have left the guild.",
+    })
+  }
+
   return (
     <div className="container py-8">
       <div className="flex flex-col gap-6">
@@ -86,7 +148,7 @@ export default function GuildsPage() {
           </h2>
           <div className="overflow-x-auto">
             <div className="inline-flex gap-4 pb-2">
-              {guilds.slice(0, 3).map((guild, index) => (
+              {guildsList.slice(0, 3).map((guild, index) => (
                 <div key={guild.id} className="flex flex-col items-center p-4 bg-card rounded-lg border min-w-[200px]">
                   <div className="relative w-16 h-16 mb-2">
                     <Image
@@ -108,7 +170,7 @@ export default function GuildsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {guilds.map((guild) => (
+          {guildsList.map((guild) => (
             <Card key={guild.id} className="card-hover">
               <CardHeader className="flex flex-row items-center gap-4">
                 <Avatar className="h-14 w-14">
@@ -126,13 +188,10 @@ export default function GuildsPage() {
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">{guild.description}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {guild.categories.map((category) => (
-                    <span
-                      key={category}
-                      className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full"
-                    >
-                      {category}
-                    </span>
+                  {guild.topics.map((topic) => (
+                    <Badge key={topic} variant="outline">
+                      {topic}
+                    </Badge>
                   ))}
                 </div>
                 <div className="bg-muted p-3 rounded-md">
@@ -145,11 +204,15 @@ export default function GuildsPage() {
                   <Users className="h-4 w-4 mr-1" />
                   {guild.members} members
                 </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/guilds/${guild.id}`} className="flex items-center">
-                    View Guild
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Link>
+                <Button
+                  variant={guild.isJoined ? "destructive" : "default"}
+                  onClick={() =>
+                    guild.isJoined
+                      ? handleLeaveGuild(guild.id)
+                      : handleJoinGuild(guild.id)
+                  }
+                >
+                  {guild.isJoined ? "Leave Guild" : "Join Guild"}
                 </Button>
               </CardFooter>
             </Card>

@@ -1,141 +1,128 @@
-import Image from "next/image"
-import { BookmarkPlus, MessageSquare, ThumbsUp } from "lucide-react"
+"use client"
 
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { formatDate } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
+import { Search } from "lucide-react"
 
-// Mock data for research posts
-const researchPosts = [
+// Prototype data
+const articles = [
   {
     id: "1",
-    title: "The Effects of Climate Change on Butterfly Migration Patterns",
-    excerpt:
-      "Our study tracked monarch butterfly migration over three years, revealing significant shifts in timing and routes due to changing climate conditions.",
+    title: "Breakthrough in Quantum Computing: New Algorithm Shows Promise",
+    excerpt: "Researchers have developed a novel quantum algorithm that could revolutionize cryptography...",
     author: {
-      name: "Alex Chen",
-      avatar: "/placeholder.svg",
-      school: "Oakridge High School",
+      name: "Dr. Sarah Chen",
+      avatar_url: "/placeholder-user.jpg",
+      institution: "Stanford University",
     },
-    image: "/placeholder.svg?height=300&width=600",
-    likes: 124,
-    comments: 32,
-    date: "2023-11-15",
-    tags: ["Climate Change", "Ecology", "Migration"],
+    category: "Quantum Computing",
+    readTime: "5 min read",
+    date: "2024-03-13",
+    tags: ["Quantum Computing", "Algorithms", "Cryptography"],
   },
   {
     id: "2",
-    title: "Developing a Machine Learning Algorithm to Predict Protein Folding",
-    excerpt:
-      "We created a novel ML approach that predicts protein structures with 87% accuracy, potentially accelerating drug discovery processes.",
+    title: "AI Models Show Remarkable Progress in Protein Folding",
+    excerpt: "New deep learning models are achieving unprecedented accuracy in predicting protein structures...",
     author: {
-      name: "Maya Patel",
-      avatar: "/placeholder.svg",
-      school: "Westview Academy",
+      name: "Prof. Michael Brown",
+      avatar_url: "/placeholder-user.jpg",
+      institution: "MIT",
     },
-    image: "/placeholder.svg?height=300&width=600",
-    likes: 98,
-    comments: 17,
-    date: "2023-12-02",
-    tags: ["Machine Learning", "Biochemistry", "Proteins"],
+    category: "AI",
+    readTime: "7 min read",
+    date: "2024-03-12",
+    tags: ["AI", "Biology", "Machine Learning"],
   },
   {
     id: "3",
-    title: "The Psychological Impact of Social Media on Adolescents",
-    excerpt:
-      "Our research surveyed 500 high school students to analyze correlations between social media usage patterns and reported anxiety levels.",
+    title: "Revolutionary Approach to Climate Change: Carbon Capture Technology",
+    excerpt: "Scientists have developed a new method for capturing and storing carbon dioxide...",
     author: {
-      name: "Jordan Taylor",
-      avatar: "/placeholder.svg",
-      school: "Riverside High",
+      name: "Dr. Emily Zhang",
+      avatar_url: "/placeholder-user.jpg",
+      institution: "UC Berkeley",
     },
-    image: "/placeholder.svg?height=300&width=600",
-    likes: 156,
-    comments: 45,
-    date: "2023-10-28",
-    tags: ["Psychology", "Social Media", "Mental Health"],
-  },
-  {
-    id: "4",
-    title: "Developing Biodegradable Plastics from Agricultural Waste",
-    excerpt:
-      "We successfully created a biodegradable plastic alternative using corn husks and other agricultural byproducts that decomposes in under 6 months.",
-    author: {
-      name: "Liam Johnson",
-      avatar: "/placeholder.svg",
-      school: "Greenfield Academy",
-    },
-    image: "/placeholder.svg?height=300&width=600",
-    likes: 112,
-    comments: 29,
-    date: "2023-11-05",
-    tags: ["Materials Science", "Sustainability", "Bioplastics"],
+    category: "Environmental Science",
+    readTime: "6 min read",
+    date: "2024-03-11",
+    tags: ["Climate Change", "Technology", "Environmental Science"],
   },
 ]
 
 export default function DiscoverPage() {
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const filteredArticles = articles.filter((article) =>
+    article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    article.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  )
+
   return (
     <div className="container py-8">
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-8">
+        <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Discover Research</h1>
-          <p className="text-muted-foreground">
-            Explore groundbreaking research from high school students around the world
-          </p>
+          <div className="relative w-64">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search articles..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8"
+            />
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {researchPosts.map((post) => (
-            <Card key={post.id} className="overflow-hidden card-hover">
-              <div className="aspect-video relative">
-                <Image src={post.image || "/placeholder.svg"} alt={post.title} fill className="object-cover" />
-              </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredArticles.map((article) => (
+            <Card
+              key={article.id}
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => router.push(`/discover/${article.id}`)}
+            >
               <CardHeader>
                 <div className="flex items-center gap-2 mb-2">
-                  {post.tags.map((tag) => (
-                    <span key={tag} className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full">
-                      {tag}
-                    </span>
-                  ))}
+                  <Badge variant="secondary">{article.category}</Badge>
+                  <span className="text-sm text-muted-foreground">{article.readTime}</span>
                 </div>
-                <CardTitle className="line-clamp-2">{post.title}</CardTitle>
-                <CardDescription className="line-clamp-2">{post.excerpt}</CardDescription>
+                <CardTitle className="line-clamp-2">{article.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={post.author.avatar} alt={post.author.name} />
-                    <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">{post.author.name}</span>
-                    <span className="text-xs text-muted-foreground">{post.author.school}</span>
+                <div className="space-y-4">
+                  <p className="text-muted-foreground line-clamp-3">{article.excerpt}</p>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    {article.tags.map((tag) => (
+                      <Badge key={tag} variant="outline">
+                        {tag}
+                      </Badge>
+                    ))}
                   </div>
+
+                  <div className="flex items-center gap-2">
+                    <Avatar>
+                      <AvatarImage src={article.author.avatar_url} alt={article.author.name} />
+                      <AvatarFallback>{article.author.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium">{article.author.name}</p>
+                      <p className="text-sm text-muted-foreground">{article.author.institution}</p>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground">{article.date}</p>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between">
-                <div className="text-sm text-muted-foreground">{formatDate(post.date)}</div>
-                <div className="flex items-center gap-4">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <ThumbsUp className="h-4 w-4" />
-                    <span className="ml-1 text-xs">{post.likes}</span>
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MessageSquare className="h-4 w-4" />
-                    <span className="ml-1 text-xs">{post.comments}</span>
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <BookmarkPlus className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardFooter>
             </Card>
           ))}
-        </div>
-
-        <div className="flex justify-center mt-6">
-          <Button variant="outline">Load More</Button>
         </div>
       </div>
     </div>
